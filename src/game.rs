@@ -3,7 +3,6 @@ use crate::pawn::Pawn;
 const ROWS: usize = 6;
 const COLS: usize = 7;
 
-struct ConnectFour {
 pub struct ConnectFour {
     /// Board matrix, stores the colored emojis.
     board: [[Pawn; COLS]; ROWS],
