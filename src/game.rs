@@ -13,57 +13,6 @@ pub struct ConnectFour {
 }
 
 impl ConnectFour {
-    fn is_four_connected(self: &Self, row: usize, col: usize) -> bool {
-        if col + 4 < COLS {
-            for i in 0..4 {
-                if self.board[row][col + i] != self.turn {
-                    return false;
-                }
-            }
-        }
-
-        if col - 4 >= 0 {
-            for i in 0..4 {
-                if self.board[row][col - i] != self.turn {
-                    return false;
-                }
-            }
-        }
-
-        if row + 4 < ROWS {
-            for i in 0..4 {
-                if self.board[row + i][col] != self.turn {
-                    return false;
-                }
-            }
-        }
-
-        if row - 4 >= 0 {
-            for i in 0..4 {
-                if self.board[row - i][col] != self.turn {
-                    return false;
-                }
-            }
-        }
-
-        if row + 4 < ROWS && col + 4 < COLS {
-            for i in 0..4 {
-                if self.board[row + i][col + i] != self.turn {
-                    return false;
-                }
-            }
-        }
-
-        if row - 4 >= 0 && col - 4 >= 0 {
-            for i in 0..4 {
-                if self.board[row - i][col - i] != self.turn {
-                    return false;
-                }
-            }
-        }
-
-        true
-    }
     /// Check if the last placed pawn is connected to four other pawns of the same color.
     /// Optimized to only check around the last placed pawn instead of the whole board.
     /// Note: Should be called after placing the pawn and before switching the pawn.
