@@ -1,3 +1,10 @@
+use std::fmt;
+use std::io;
+use std::io::Write;
+
+use colored::ColoredString;
+use colored::Colorize;
+
 use crate::pawn::Pawn;
 
 const ROWS: usize = 6;
@@ -94,12 +101,35 @@ impl ConnectFour {
 
 impl fmt::Display for ConnectFour {
     fn fmt(self: &Self, f: &mut fmt::Formatter) -> fmt::Result {
-        for row in self.board.iter() {
-            for pawn in row.iter() {
-                write!(f, "{}", pawn)?;
-            }
-            writeln!(f)?;
-        }
+        static BOTTOM_LEFT_CORNOR: &str = "└";
+        static BOTTOM_RIGHT_CORNOR: &str = "┘";
+        static VERITICAL_BAR: &str = "│";
+        static HORIZONTAL_BAR: &str = "─";
+
+        [
+            // Open top part of the board.
+            "\n".to_string(),
+            // The board formatted with pipes surrounding it.
+            self.board
+                .iter()
+                .map(|row| {
+                    VERITICAL_BAR.to_string()
+                        + &row
+                            .iter()
+                            .map(|pawn| pawn.to_string())
+                            .collect::<Vec<String>>()
+                            .join("")
+                        + VERITICAL_BAR
+                })
+                .collect::<Vec<String>>()
+                .join("\n"),
+            // Bottom part of the board.
+            BOTTOM_LEFT_CORNOR.to_string()
+                + HORIZONTAL_BAR.repeat(COLS * 2).as_str()
+                + BOTTOM_RIGHT_CORNOR,
+        ]
+        .join("\n")
+        .fmt(f)?;
         Ok(())
     }
 }
