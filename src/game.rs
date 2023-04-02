@@ -98,13 +98,54 @@ impl ConnectFour {
 
     fn place(&mut self, row: usize, col: usize) {
         self.board[row][col] = self.turn;
-        self.is_connected = self.is_four_connected(row, col);
-
-        if self.is_connected || self.is_full() {
-            self.is_draw = true;
-        }
-
+        // self.is_connected = self.is_four_connected(row, col);
+        self.is_draw = self.is_full();
         self.turn.switch();
+    }
+
+    #[inline]
+    fn input_col(buffer: &str) -> usize {
+        let mut input = String::new();
+        io::stdout().write(buffer.as_bytes()).unwrap();
+        io::stdout().flush().unwrap();
+        io::stdin().read_line(&mut input).unwrap();
+        input.trim().parse().unwrap()
+    }
+
+    fn get_empty_spot(self: &Self, col: usize) -> Option<usize> {
+        for row in (0..ROWS).rev() {
+            if !self.is_set(row, col) {
+                return Some(row);
+            }
+        }
+        None
+    }
+
+    pub fn run() {
+        let mut game = Self::new();
+        let mut col;
+
+        loop {
+            print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+            println!("{}", game);
+
+            // if game.is_connected {
+            //     println!("{} won!", game.turn);
+            //     break;
+            // } else if game.is_draw {
+            //     println!("Draw!");
+            //     break;
+            // }
+
+            println!("{}'s turn", game.turn);
+
+            col = Self::input_col("Enter column: ");
+            if let Some(row) = game.get_empty_spot(col) {
+                game.place(row, col);
+            } else {
+                println!("Column is full!");
+            }
+        }
     }
 }
 
