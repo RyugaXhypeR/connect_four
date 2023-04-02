@@ -64,6 +64,10 @@ impl ConnectFour {
 
         true
     }
+    /// Check if the last placed pawn is connected to four other pawns of the same color.
+    /// Optimized to only check around the last placed pawn instead of the whole board.
+    /// Note: Should be called after placing the pawn and before switching the pawn.
+    // fn is_four_connected(self: &Self, row: usize, col: usize) -> bool {}
 
     fn is_full(self: &Self) -> bool {
         for row in 0..ROWS {
