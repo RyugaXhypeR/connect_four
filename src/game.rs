@@ -18,14 +18,9 @@ impl ConnectFour {
     // fn is_four_connected(self: &Self, row: usize, col: usize) -> bool {}
 
     fn is_full(self: &Self) -> bool {
-        for row in 0..ROWS {
-            for col in 0..COLS {
-                if self.board[row][col] == Pawn::White {
-                    return false;
-                }
-            }
-        }
-        true
+        self.board
+            .iter()
+            .all(|row| row.iter().all(|&item| item != Pawn::White))
     }
 
     fn is_set(self: &Self, row: usize, col: usize) -> bool {
