@@ -1,5 +1,3 @@
-use std::{fmt, os::unix::ucred::impl_linux};
-
 use crate::pawn::Pawn;
 
 const ROWS: usize = 6;
@@ -93,8 +91,14 @@ impl ConnectFour {
         }
     }
 
-    fn set(&mut self, row: usize, col: usize) {
+    fn place(&mut self, row: usize, col: usize) {
         self.board[row][col] = self.turn;
+        self.is_connected = self.is_four_connected(row, col);
+
+        if self.is_connected || self.is_full() {
+            self.is_draw = true;
+        }
+
         self.turn.switch();
     }
 }
