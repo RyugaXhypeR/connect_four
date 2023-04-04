@@ -99,34 +99,55 @@ impl ConnectFour {
     }
 }
 
+enum BoxTextures {
+    BottomLeftCorner,
+    BottomRightCorner,
+    VerticalBar,
+    HorizontalBar,
+}
+
+impl fmt::Display for BoxTextures {
+    /// Display the box textures using the colored crate.
+    fn fmt(self: &Self, f: &mut fmt::Formatter) -> fmt::Result {
+        use BoxTextures::*;
+        let texture = match self {
+            BottomLeftCorner => "└",
+            BottomRightCorner => "┘",
+            VerticalBar => "│",
+            HorizontalBar => "─",
+        };
+
+        write!(f, "{}", texture.yellow().bold())
+    }
+}
+
 impl fmt::Display for ConnectFour {
     fn fmt(self: &Self, f: &mut fmt::Formatter) -> fmt::Result {
-        static BOTTOM_LEFT_CORNOR: &str = "└";
-        static BOTTOM_RIGHT_CORNOR: &str = "┘";
-        static VERITICAL_BAR: &str = "│";
-        static HORIZONTAL_BAR: &str = "─";
-
         [
             // Open top part of the board.
+            // Part from which the pawn will fall.
             "\n".to_string(),
-            // The board formatted with pipes surrounding it.
+            // The game board formatted with vertical bars surrounding it.
             self.board
                 .iter()
                 .map(|row| {
-                    VERITICAL_BAR.to_string()
+                    BoxTextures::VerticalBar.to_string()
                         + &row
                             .iter()
                             .map(|pawn| pawn.to_string())
                             .collect::<Vec<String>>()
                             .join("")
-                        + VERITICAL_BAR
+                        + BoxTextures::VerticalBar.to_string().as_str()
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
             // Bottom part of the board.
-            BOTTOM_LEFT_CORNOR.to_string()
-                + HORIZONTAL_BAR.repeat(COLS * 2).as_str()
-                + BOTTOM_RIGHT_CORNOR,
+            BoxTextures::BottomLeftCorner.to_string()
+                + BoxTextures::HorizontalBar
+                    .to_string()
+                    .repeat(COLS * 2)
+                    .as_str()
+                + BoxTextures::BottomRightCorner.to_string().as_str(),
         ]
         .join("\n")
         .fmt(f)?;
