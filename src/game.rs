@@ -109,12 +109,11 @@ enum BoxTextures {
 impl fmt::Display for BoxTextures {
     /// Display the box textures using the colored crate.
     fn fmt(self: &Self, f: &mut fmt::Formatter) -> fmt::Result {
-        use BoxTextures::*;
         let texture = match self {
-            BottomLeftCorner => "└",
-            BottomRightCorner => "┘",
-            VerticalBar => "│",
-            HorizontalBar => "─",
+            BoxTextures::BottomLeftCorner => "└",
+            BoxTextures::BottomRightCorner => "┘",
+            BoxTextures::VerticalBar => "│",
+            BoxTextures::HorizontalBar => "─",
         };
 
         write!(f, "{}", texture.yellow().bold())
