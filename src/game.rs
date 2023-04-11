@@ -2,7 +2,6 @@ use std::fmt;
 use std::io;
 use std::io::Write;
 
-use colored::ColoredString;
 use colored::Colorize;
 
 use crate::pawn::Pawn;
@@ -16,25 +15,10 @@ pub struct ConnectFour {
     turn: Pawn,
     is_connected: bool,
     is_draw: bool,
+    moves_stack: Vec<(Pawn, (usize, usize))>,
 }
 
-impl ConnectFour {
-    /// Check if the last placed pawn is connected to four other pawns of the same color.
-    /// Optimized to only check around the last placed pawn instead of the whole board.
-    /// Note: Should be called after placing the pawn and before switching the pawn.
-    // fn is_four_connected(self: &Self, row: usize, col: usize) -> bool {}
-
-    fn is_full(self: &Self) -> bool {
-        self.board
-            .iter()
-            .all(|row| row.iter().all(|&item| item != Pawn::White))
-    }
-
-    fn is_set(self: &Self, row: usize, col: usize) -> bool {
-        self.board[row][col] != Pawn::White
-    }
-}
-
+/// Controller for `ConnectFour`, handles the concept / logic of the game.
 impl ConnectFour {
     fn new() -> Self {
         Self {
@@ -43,23 +27,8 @@ impl ConnectFour {
             turn: Pawn::Red,
             is_connected: false,
             is_draw: false,
+            moves_stack: Vec::new(),
         }
-    }
-
-    fn place(&mut self, row: usize, col: usize) {
-        self.board[row][col] = self.turn;
-        // self.is_connected = self.is_four_connected(row, col);
-        self.is_draw = self.is_full();
-        self.turn.switch();
-    }
-
-    #[inline]
-    fn input_col(buffer: &str) -> usize {
-        let mut input = String::new();
-        io::stdout().write(buffer.as_bytes()).unwrap();
-        io::stdout().flush().unwrap();
-        io::stdin().read_line(&mut input).unwrap();
-        input.trim().parse().unwrap()
     }
 
     fn get_empty_spot(self: &Self, col: usize) -> Option<usize> {
@@ -71,30 +40,109 @@ impl ConnectFour {
         None
     }
 
+    /// Check if the last placed pawn is connected to four other pawns of the same color.
+    /// Optimized to only check around the last placed pawn instead of the whole board.
+    /// Note: Should be called after placing the pawn and before switching the pawn.
+    fn is_four_connected(self: &Self, row: usize, col: usize) -> bool {
+        [
+            // Horizontal check
+            self.board[row].try_into().unwrap(),
+            // Vertrical check
+            self.board.iter().map(|r| r[col]).collect::<Vec<Pawn>>(),
+            // Diagonal (Bottom left to top right)
+            (0..ROWS)
+                .rev()
+                .map(|i| (0..COLS).map(|j| self.board[i][j]).collect::<Vec<Pawn>>())
+                .flatten()
+                .collect::<Vec<Pawn>>(),
+            // Diagonal (Top left to bottom right)
+            (0..ROWS)
+                .rev()
+                .map(|i| {
+                    (1..COLS)
+                        .rev()
+                        .map(|j| self.board[i][j])
+                        .collect::<Vec<Pawn>>()
+                })
+                .flatten()
+                .collect::<Vec<Pawn>>(),
+        ]
+        .iter()
+        .map(|arr| arr.iter().filter(|&item| *item == self.turn).count())
+        .any(|count| count >= 4)
+    }
+
+    fn is_full(self: &Self) -> bool {
+        self.board
+            .iter()
+            .all(|row| row.iter().all(|&item| item != Pawn::White))
+    }
+    fn is_over(self: &Self) -> bool {
+        self.is_connected || self.is_draw
+    }
+
+    fn is_set(self: &Self, row: usize, col: usize) -> bool {
+        self.board[row][col] != Pawn::White
+    }
+
+    fn place(&mut self, row: usize, col: usize) {
+        self.moves_stack.push((self.turn, (row, col)));
+        self.board[row][col] = self.turn;
+        self.is_connected = self.is_four_connected(row, col);
+        self.is_draw = self.is_full();
+    }
+}
+
+/// View for `ConnectFour`, handles the io of the game.
+impl ConnectFour {
+    /// Helper function which prints the buffer and takes the column number as input.
+    /// Also converts the column number to `usize`
+    #[inline]
+    fn input_column_number(buffer: &str) -> usize {
+        let mut input = String::new();
+        io::stdout().write(buffer.as_bytes()).unwrap();
+        io::stdout().flush().unwrap();
+        io::stdin().read_line(&mut input).unwrap();
+        input.trim().parse().unwrap()
+    }
+
+    #[inline]
+    fn validate_column_number(col: usize) -> Result<usize, &'static str> {
+        if col > COLS {
+            return Err("Column number is out of bounds!");
+        }
+        Ok(col)
+    }
+
+    fn render_board(self: &Self) {
+        print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+        println!("{}", self);
+    }
+
     pub fn run() {
         let mut game = Self::new();
-        let mut col;
+        let mut col: usize;
 
-        loop {
-            print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
-            println!("{}", game);
-
-            // if game.is_connected {
-            //     println!("{} won!", game.turn);
-            //     break;
-            // } else if game.is_draw {
-            //     println!("Draw!");
-            //     break;
-            // }
-
+        while !game.is_over() {
+            // Clear the terminal and place the cursor at the beginning.
+            game.render_board();
             println!("{}'s turn", game.turn);
 
-            col = Self::input_col("Enter column: ");
-            if let Some(row) = game.get_empty_spot(col) {
-                game.place(row, col);
-            } else {
-                println!("Column is full!");
-            }
+            col = match Self::validate_column_number(Self::input_column_number(
+                "Enter column number: ",
+            )) {
+                Ok(col) => col,
+                Err(_) => continue,
+            };
+            game.place(game.get_empty_spot(col).unwrap(), col);
+            game.turn.switch();
+        }
+
+        game.render_board();
+        if game.is_connected {
+            println!("{} won!", game.moves_stack.last().unwrap().0);
+        } else {
+            println!("Draw!");
         }
     }
 }
@@ -151,5 +199,57 @@ impl fmt::Display for ConnectFour {
         .join("\n")
         .fmt(f)?;
         Ok(())
+    }
+}
+
+mod tests {
+    use super::ConnectFour;
+
+    #[test]
+    fn test_connected_vertical() {
+        let mut game = ConnectFour::new();
+        game.place(0, 0);
+        game.place(1, 0);
+        game.place(2, 0);
+        assert!(!game.is_connected);
+        game.place(3, 0);
+        println!("Vertial: {}", game);
+        assert!(game.is_connected);
+    }
+
+    #[test]
+    fn test_connected_horizontal() {
+        let mut game = ConnectFour::new();
+        game.place(0, 0);
+        game.place(0, 1);
+        game.place(0, 2);
+        assert!(!game.is_connected);
+        game.place(0, 3);
+        println!("Horizontal: {}", game);
+        assert!(game.is_connected);
+    }
+
+    #[test]
+    fn test_connected_diagonal_bottom_left_to_top_right() {
+        let mut game = ConnectFour::new();
+        game.place(3, 0);
+        game.place(2, 1);
+        game.place(1, 2);
+        assert!(!game.is_connected);
+        game.place(0, 3);
+        println!("Botton to Top: {}", game);
+        assert!(game.is_connected);
+    }
+
+    #[test]
+    fn test_connected_diagonal_top_left_to_bottom_right() {
+        let mut game = ConnectFour::new();
+        game.place(3, 3);
+        game.place(2, 2);
+        game.place(1, 1);
+        assert!(!game.is_connected);
+        game.place(0, 0);
+        println!("Top to Bottom: {}", game);
+        assert!(game.is_connected);
     }
 }
