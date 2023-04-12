@@ -202,6 +202,7 @@ impl fmt::Display for ConnectFour {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::ConnectFour;
 
