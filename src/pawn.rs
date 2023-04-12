@@ -8,6 +8,7 @@ pub enum Pawn {
 }
 
 impl fmt::Display for Pawn {
+    /// Display the pawn as a unicode character.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Pawn::Red => write!(f, "🔴"),
@@ -18,6 +19,7 @@ impl fmt::Display for Pawn {
 }
 
 impl Pawn {
+    /// Switch the color of the pawn, red to blue, blue to red.
     pub fn switch(&mut self) {
         *self = match self {
             Pawn::Red => Pawn::Blue,
