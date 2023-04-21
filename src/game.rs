@@ -32,7 +32,7 @@ impl ConnectFour {
     }
 
     fn get_empty_spot(self: &Self, col: usize) -> Option<usize> {
-        (0.ROWS).rev().find(|&row| !self.is_set(row, col))
+        (0..ROWS).rev().find(|&row| !self.is_set(row, col))
     }
 
     /// Check if the last placed pawn is connected to four other pawns of the same color.
