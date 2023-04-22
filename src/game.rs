@@ -37,6 +37,7 @@ impl ConnectFour {
     /// # Panics
     /// When `col` is not in range `[0, MAX_COL)`
     fn get_empty_spot(self: &Self, col: usize) -> Option<usize> {
+        assert!(col < MAX_COL);
         (0..MAX_ROW).rev().find(|&row| !self.is_set(row, col))
     }
 
@@ -49,6 +50,8 @@ impl ConnectFour {
     /// When `row` is not in range `[0, MAX_ROW)`
     fn is_four_connected(self: &Self, row: usize, col: usize) -> bool {
         [
+        assert!(col < MAX_COL);
+        assert!(col < MAX_ROW);
             // Horizontal check
             self.board[row].try_into().unwrap(),
             // Vertrical check
