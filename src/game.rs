@@ -32,6 +32,10 @@ impl ConnectFour {
         }
     }
 
+    /// Get empty row from the respective column.
+    ///
+    /// # Panics
+    /// When `col` is not in range `[0, MAX_COL)`
     fn get_empty_spot(self: &Self, col: usize) -> Option<usize> {
         (0..MAX_ROW).rev().find(|&row| !self.is_set(row, col))
     }
@@ -39,6 +43,10 @@ impl ConnectFour {
     /// Check if the last placed pawn is connected to four other pawns of the same color.
     /// Optimized to only check around the last placed pawn instead of the whole board.
     /// Note: Should be called after placing the pawn and before switching the pawn.
+    ///
+    /// # Panics
+    /// When `col` is not in range `[0, MAX_COL)`
+    /// When `row` is not in range `[0, MAX_ROW)`
     fn is_four_connected(self: &Self, row: usize, col: usize) -> bool {
         [
             // Horizontal check
