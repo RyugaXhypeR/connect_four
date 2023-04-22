@@ -6,12 +6,13 @@ use colored::Colorize;
 
 use crate::pawn::Pawn;
 
-const ROWS: usize = 6;
-const COLS: usize = 7;
+const MAX_ROW: usize = 6;
+const MAX_COL: usize = 7;
+const MIN_CONNECT: usize = 4;
 
 pub struct ConnectFour {
     /// Board matrix, stores the colored emojis.
-    board: [[Pawn; COLS]; ROWS],
+    board: [[Pawn; MAX_COL]; MAX_ROW],
     turn: Pawn,
     is_connected: bool,
     is_draw: bool,
@@ -22,7 +23,7 @@ pub struct ConnectFour {
 impl ConnectFour {
     fn new() -> Self {
         Self {
-            board: [[Pawn::White; COLS]; ROWS],
+            board: [[Pawn::White; MAX_COL]; MAX_ROW],
             // Red starts first.
             turn: Pawn::Red,
             is_connected: false,
@@ -32,7 +33,7 @@ impl ConnectFour {
     }
 
     fn get_empty_spot(self: &Self, col: usize) -> Option<usize> {
-        (0..ROWS).rev().find(|&row| !self.is_set(row, col))
+        (0..MAX_ROW).rev().find(|&row| !self.is_set(row, col))
     }
 
     /// Check if the last placed pawn is connected to four other pawns of the same color.
@@ -103,7 +104,7 @@ impl ConnectFour {
 
     #[inline]
     fn validate_column_number(col: usize) -> Result<usize, &'static str> {
-        if col > COLS {
+        if col > MAX_COL {
             return Err("Column number is out of bounds!");
         }
         Ok(col)
@@ -175,10 +176,10 @@ impl fmt::Display for ConnectFour {
                 .map(|row| {
                     BoxTextures::VerticalBar.to_string()
                         + &row
-                            .iter()
-                            .map(|pawn| pawn.to_string())
-                            .collect::<Vec<String>>()
-                            .join("")
+                        .iter()
+                        .map(|pawn| pawn.to_string())
+                        .collect::<Vec<String>>()
+                        .join("")
                         + BoxTextures::VerticalBar.to_string().as_str()
                 })
                 .collect::<Vec<String>>()
@@ -186,13 +187,13 @@ impl fmt::Display for ConnectFour {
             // Bottom part of the board.
             BoxTextures::BottomLeftCorner.to_string()
                 + BoxTextures::HorizontalBar
-                    .to_string()
-                    .repeat(COLS * 2)
-                    .as_str()
+                .to_string()
+                .repeat(MAX_COL * 2)
+                .as_str()
                 + BoxTextures::BottomRightCorner.to_string().as_str(),
         ]
-        .join("\n")
-        .fmt(f)?;
+            .join("\n")
+            .fmt(f)?;
         Ok(())
     }
 }
