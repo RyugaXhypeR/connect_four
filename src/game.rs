@@ -36,22 +36,22 @@ impl ConnectFour {
     ///
     /// # Panics
     /// When `col` is not in range `[0, MAX_COL)`
-    fn get_empty_spot(self: &Self, col: usize) -> Option<usize> {
+    fn get_empty_spot(&self, col: usize) -> Option<usize> {
         assert!(col < MAX_COL);
         (0..MAX_ROW).rev().find(|&row| !self.is_set(row, col))
     }
 
     /// Check if the last placed pawn is connected to four other pawns of the same color.
     /// Optimized to only check around the last placed pawn instead of the whole board.
-    /// Note: Should be called after placing the pawn and before switching the pawn.
+    ///
+    /// **Note:** Should be called after placing the pawn and before switching the pawn.
     ///
     /// # Panics
     /// When `col` is not in range `[0, MAX_COL)`
     /// When `row` is not in range `[0, MAX_ROW)`
-    fn is_four_connected(self: &Self, row: usize, col: usize) -> bool {
-        [
+    fn is_four_connected(&self, row: usize, col: usize) -> bool {
         assert!(col < MAX_COL);
-        assert!(col < MAX_ROW);
+        assert!(row < MAX_ROW);
             // Horizontal check
             self.board[row].try_into().unwrap(),
             // Vertrical check
@@ -79,16 +79,17 @@ impl ConnectFour {
         .any(|count| count >= 4)
     }
 
-    fn is_full(self: &Self) -> bool {
+    fn is_full(&self) -> bool {
         self.board
             .iter()
             .all(|row| row.iter().all(|&item| item != Pawn::White))
     }
-    fn is_over(self: &Self) -> bool {
+
+    fn is_over(&self) -> bool {
         self.is_connected || self.is_draw
     }
 
-    fn is_set(self: &Self, row: usize, col: usize) -> bool {
+    fn is_set(&self, row: usize, col: usize) -> bool {
         self.board[row][col] != Pawn::White
     }
 
@@ -121,7 +122,7 @@ impl ConnectFour {
         Ok(col)
     }
 
-    fn render_board(self: &Self) {
+    fn render_board(&self) {
         print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
         println!("{}", self);
     }
@@ -163,7 +164,7 @@ enum BoxTextures {
 
 impl fmt::Display for BoxTextures {
     /// Display the box textures using the colored crate.
-    fn fmt(self: &Self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let texture = match self {
             BoxTextures::BottomLeftCorner => "└",
             BoxTextures::BottomRightCorner => "┘",
@@ -176,7 +177,7 @@ impl fmt::Display for BoxTextures {
 }
 
 impl fmt::Display for ConnectFour {
-    fn fmt(self: &Self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         [
             // Open top part of the board.
             // Part from which the pawn will fall.
