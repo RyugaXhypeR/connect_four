@@ -52,31 +52,33 @@ impl ConnectFour {
     fn is_four_connected(&self, row: usize, col: usize) -> bool {
         assert!(col < MAX_COL);
         assert!(row < MAX_ROW);
+
+        // Checking if either of the axis from the pivot index (row, col) have any connections.
+        // Doing both at the same time, shouldn't be very expensive.
+        //
+        // Basically, just constructing two arrays: one where the indices appear in the horizontal
+        // axis and the other in which the indices appear in the vertical axis.
+        // Then we get a window of `MIN_CONNECT` elements and check if they all are equal to
+        // `self.turn`.
+        let axis_checks = [
             // Horizontal check
             self.board[row].try_into().unwrap(),
-            // Vertrical check
+            // Vertical check
             self.board.iter().map(|r| r[col]).collect::<Vec<Pawn>>(),
-            // Diagonal (Bottom left to top right)
-            (0..ROWS)
-                .rev()
-                .map(|i| (0..COLS).map(|j| self.board[i][j]).collect::<Vec<Pawn>>())
-                .flatten()
-                .collect::<Vec<Pawn>>(),
-            // Diagonal (Top left to bottom right)
-            (0..ROWS)
-                .rev()
-                .map(|i| {
-                    (1..COLS)
-                        .rev()
-                        .map(|j| self.board[i][j])
-                        .collect::<Vec<Pawn>>()
-                })
-                .flatten()
-                .collect::<Vec<Pawn>>(),
         ]
         .iter()
-        .map(|arr| arr.iter().filter(|&item| *item == self.turn).count())
-        .any(|count| count >= 4)
+        .map(|r| {
+            r.windows(MIN_CONNECT)
+                .any(|window| window.iter().all(|&item| item == self.turn))
+        })
+        .any(|connected| connected);
+
+        if axis_checks {
+            return true;
+        }
+
+        // TODO: implement diagonal checks
+        false
     }
 
     fn is_full(&self) -> bool {
