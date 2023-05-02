@@ -110,7 +110,7 @@ impl ConnectFour {
     #[inline]
     fn input_column_number(buffer: &str) -> usize {
         let mut input = String::new();
-        io::stdout().write(buffer.as_bytes()).unwrap();
+        print!("{buffer}");
         io::stdout().flush().unwrap();
         io::stdin().read_line(&mut input).unwrap();
         input.trim().parse().unwrap()
