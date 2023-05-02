@@ -190,10 +190,10 @@ impl fmt::Display for ConnectFour {
                 .map(|row| {
                     BoxTextures::VerticalBar.to_string()
                         + &row
-                        .iter()
-                        .map(|pawn| pawn.to_string())
-                        .collect::<Vec<String>>()
-                        .join("")
+                            .iter()
+                            .map(|pawn| pawn.to_string())
+                            .collect::<Vec<String>>()
+                            .join("")
                         + BoxTextures::VerticalBar.to_string().as_str()
                 })
                 .collect::<Vec<String>>()
@@ -201,13 +201,13 @@ impl fmt::Display for ConnectFour {
             // Bottom part of the board.
             BoxTextures::BottomLeftCorner.to_string()
                 + BoxTextures::HorizontalBar
-                .to_string()
-                .repeat(MAX_COL * 2)
-                .as_str()
+                    .to_string()
+                    .repeat(MAX_COL * 2)
+                    .as_str()
                 + BoxTextures::BottomRightCorner.to_string().as_str(),
         ]
-            .join("\n")
-            .fmt(f)?;
+        .join("\n")
+        .fmt(f)?;
         Ok(())
     }
 }
@@ -215,52 +215,119 @@ impl fmt::Display for ConnectFour {
 #[cfg(test)]
 mod tests {
     use super::ConnectFour;
+    use super::Pawn::{self, *};
 
-    #[test]
-    fn test_connected_vertical() {
-        let mut game = ConnectFour::new();
-        game.place(0, 0);
-        game.place(1, 0);
-        game.place(2, 0);
-        assert!(!game.is_connected);
-        game.place(3, 0);
-        println!("Vertial: {}", game);
-        assert!(game.is_connected);
+    fn from_board(board: [[Pawn; 7]; 6]) -> ConnectFour {
+        ConnectFour {
+            board,
+            is_draw: false,
+            is_connected: false,
+            turn: Red,
+            moves_stack: vec![],
+        }
     }
 
     #[test]
-    fn test_connected_horizontal() {
-        let mut game = ConnectFour::new();
-        game.place(0, 0);
-        game.place(0, 1);
-        game.place(0, 2);
-        assert!(!game.is_connected);
-        game.place(0, 3);
-        println!("Horizontal: {}", game);
-        assert!(game.is_connected);
+    fn test_connected_vertical_pass() {
+        let connect_four = from_board([
+            [White; 7],
+            [White; 7],
+            [Red, White, White, White, White, White, White],
+            [Red, White, White, White, White, White, White],
+            [Red, White, White, White, White, White, White],
+            [Red, White, White, White, White, White, White],
+        ]);
+        assert!(connect_four.is_four_connected(2, 0));
     }
 
     #[test]
-    fn test_connected_diagonal_bottom_left_to_top_right() {
-        let mut game = ConnectFour::new();
-        game.place(3, 0);
-        game.place(2, 1);
-        game.place(1, 2);
-        assert!(!game.is_connected);
-        game.place(0, 3);
-        println!("Botton to Top: {}", game);
-        assert!(game.is_connected);
+    fn test_connected_vertical_fail() {
+        let connect_four = from_board([
+            [Red, White, White, White, White, White, White],
+            [Red, White, White, White, White, White, White],
+            [White, White, White, White, White, White, White],
+            [Red, White, White, White, White, White, White],
+            [Red, White, White, White, White, White, White],
+            [White; 7],
+        ]);
+        assert!(!connect_four.is_four_connected(4, 0));
     }
 
     #[test]
-    fn test_connected_diagonal_top_left_to_bottom_right() {
-        let mut game = ConnectFour::new();
-        game.place(3, 3);
-        game.place(2, 2);
-        game.place(1, 1);
-        assert!(!game.is_connected);
-        game.place(0, 0);
-        println!("Top to Bottom: {}", game);
-        assert!(game.is_connected);
+    fn test_connected_horizontal_pass() {
+        let connect_four = from_board([
+            [Red, Red, Red, Red, White, White, White],
+            [White; 7],
+            [White; 7],
+            [White; 7],
+            [White; 7],
+            [White; 7],
+        ]);
+        assert!(connect_four.is_four_connected(0, 3));
+    }
+
+    #[test]
+    fn test_connected_horizontal_fail() {
+        let connect_four = from_board([
+            [Red, Red, Red, White, Red, White, White],
+            [White; 7],
+            [White; 7],
+            [White; 7],
+            [White; 7],
+            [White; 7],
+        ]);
+        assert!(!connect_four.is_four_connected(0, 4));
+    }
+
+    #[test]
+    fn test_connected_diagonal_top_left_to_bottom_right_pass() {
+        let connect_four = from_board([
+            [White; 7],
+            [White; 7],
+            [Red, White, White, White, White, White, White],
+            [White, Red, White, White, White, White, White],
+            [White, White, Red, White, White, White, White],
+            [White, White, White, Red, White, White, White],
+        ]);
+        assert!(connect_four.is_four_connected(2, 0));
+    }
+
+    #[test]
+    fn test_connected_diagonal_top_left_to_bottom_right_fail() {
+        let connect_four = from_board([
+            [White; 7],
+            [Red, White, White, White, White, White, White],
+            [White, Red, White, White, White, White, White],
+            [White, White, White, White, White, White, White],
+            [White, White, White, Red, White, White, White],
+            [White, White, White, White, Red, White, White],
+        ]);
+        assert!(!connect_four.is_four_connected(1, 0));
+    }
+
+    #[test]
+    fn test_connected_diagonal_bottom_left_to_top_right_pass() {
+        let connect_four = from_board([
+            [White; 7],
+            [White; 7],
+            [White, White, White, Red, White, White, White],
+            [White, White, Red, White, White, White, White],
+            [White, Red, White, White, White, White, White],
+            [Red, White, White, White, White, White, White],
+        ]);
+        assert!(connect_four.is_four_connected(6, 0));
+    }
+
+    #[test]
+    fn test_connected_diagonal_bottom_left_to_top_right_fail() {
+        let connect_four = from_board([
+            [White; 7],
+            [White, White, White, White, Red, White, White],
+            [White, White, White, Red, White, White, White],
+            [White, White, White, White, White, White, White],
+            [White, Red, White, White, White, White, White],
+            [Red, White, White, White, White, White, White],
+        ]);
+        assert!(!connect_four.is_four_connected(6, 0));
     }
 }

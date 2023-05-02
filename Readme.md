@@ -7,4 +7,3 @@ git clone https://github.com/RyugaXhypeR/connect_four.git
 cd connect_four
 cargo run
 ```
-
