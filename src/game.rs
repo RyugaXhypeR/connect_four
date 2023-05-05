@@ -78,7 +78,7 @@ impl ConnectFour {
         }
 
         // TODO: implement diagonal checks
-        false
+        todo!()
     }
 
     fn is_full(&self) -> bool {
