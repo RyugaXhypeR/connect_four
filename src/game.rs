@@ -77,8 +77,39 @@ impl ConnectFour {
             return true;
         }
 
-        // TODO: implement diagonal checks
-        todo!()
+        [
+            // Diagonal (Top left to bottom right)
+            self.board
+                .iter()
+                .enumerate()
+                .flat_map(|(i, r)| {
+                    r.iter()
+                        .enumerate()
+                        .filter(move |(j, _)| {
+                            row as isize - i as isize == col as isize - *j as isize
+                        })
+                        .map(|(_, &p)| p)
+                })
+                .collect::<Vec<Pawn>>(),
+            self.board
+                .iter()
+                .enumerate()
+                .flat_map(|(i, r)| {
+                    r.iter()
+                        .enumerate()
+                        .filter(move |(j, _)| {
+                            row as isize - i as isize == *j as isize - col as isize
+                        })
+                        .map(|(_, &p)| p)
+                })
+                .collect::<Vec<Pawn>>(),
+        ]
+        .iter()
+        .map(|r| {
+            r.windows(MIN_CONNECT)
+                .any(|window| window.iter().all(|&item| item == self.turn))
+        })
+        .any(|connected| connected)
     }
 
     fn is_full(&self) -> bool {
@@ -315,7 +346,7 @@ mod tests {
             [White, Red, White, White, White, White, White],
             [Red, White, White, White, White, White, White],
         ]);
-        assert!(connect_four.is_four_connected(6, 0));
+        assert!(connect_four.is_four_connected(5, 0));
     }
 
     #[test]
@@ -328,6 +359,6 @@ mod tests {
             [White, Red, White, White, White, White, White],
             [Red, White, White, White, White, White, White],
         ]);
-        assert!(!connect_four.is_four_connected(6, 0));
+        assert!(!connect_four.is_four_connected(5, 0));
     }
 }
